@@ -4,10 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [criterium "0.4.3"]
-                 ;[net.mikera/core.matrix "0.29.1"]
-                 [incanter "1.5.5"]]
+                 [criterium "0.4.3"]]
   :plugins [[lein-nodisassemble "0.1.3"]]
   :main clojure-benchmarking.control-benchmark
-  :aot [clojure-benchmarking.control-benchmark]
+  ;:aot [clojure-benchmarking.control-benchmark]
   )

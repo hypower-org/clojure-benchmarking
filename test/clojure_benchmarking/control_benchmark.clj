@@ -1,11 +1,8 @@
 (ns clojure-benchmarking.control-benchmark  
   (:require [criterium.core :as c]
-            [clojure.core.matrix :as m]
-            [no.disassemble :as d])
+            [no.disassemble :as d]
+            [clojure.core.matrix :as m])
   (:gen-class))
-
-(use '(incanter core charts))
-
 
 (defn gen-matrix
   "Generates a square matrix that is n-by-n"
@@ -37,7 +34,7 @@
   `(do
      (fn []
        (~-         
-         ~@(repeatedly (+ 10 (rand-int+ 40)) #(gen-op (rand-int+ 10)))))))
+         ~@(repeatedly (+ 3 (rand-int+ 3)) #(gen-op (rand-int+ 0)))))))
 
 (defn- emitter 
   [] 
@@ -46,9 +43,10 @@
 (defmacro exper 
   []
   `(do 
-     (vector ~@(repeatedly 100 #(emitter)))))
+     (vector ~@(repeatedly 5 #(emitter)))))
  
 
+(defn -main []
 (defn bytecode-count
   [func]  
   (let [helper (fn this
@@ -80,16 +78,12 @@
     (def one counts)
     (def two results)
     (spit "counts.edn" counts)
-    (spit "bps.edn" results)
-    
-    (view (xy-plot counts results :x-label "bytecode count" :y-label "bytecode rate"))))
+    (spit "bps.edn" results)))
 
 
-(defn -main []
   (approximate-bytecode)
   (println "AVERAGE BYTECODE RATE (Bps): " (/ (reduce + two) (count two))))
-;7579305.633078149
-;1.7869334525406778E11
+
 
 
 
