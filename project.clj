@@ -7,4 +7,7 @@
                  [criterium "0.4.3"]
                  ;[net.mikera/core.matrix "0.29.1"]
                  [incanter "1.5.5"]]
-  :plugins [[lein-nodisassemble "0.1.3"]])
+  :plugins [[lein-nodisassemble "0.1.3"]]
+  :main clojure-benchmarking.control-benchmark
+  :aot [clojure-benchmarking.control-benchmark]
+  )
