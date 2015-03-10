@@ -7,5 +7,4 @@ The code in this repository allows for clojure users to stress test hardware by 
 
 Copyright © 2015
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Eclipse Public License either version 1.0 
