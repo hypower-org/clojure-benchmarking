@@ -1,14 +1,11 @@
 # clojure-benchmarking
 
-A Clojure library designed to ... well, that part is up to you.
+The code in this repository allows for clojure users to stress test hardware by producing and running arbitary jvm bytecode.  It will calculate the average bytecode per second that the system is capable of running.
 
-## Usage
-
-FIXME
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
