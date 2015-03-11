@@ -1,22 +1,7 @@
 (ns clojure-benchmarking.control-benchmark  
   (:require [criterium.core :as c]
-            [no.disassemble :as d]
-            [clojure.core.matrix :as m])
+            [no.disassemble :as d])
   (:gen-class))
-
-(defn gen-matrix
-  "Generates a square matrix that is n-by-n"
-  [n] 
-
-  (m/matrix (partition n (range 1 (inc (* n n))))))
-
-;1.0839593584649472E7
-
-(defn big-computation 
-  []
-  (let [comp (m/inverse (gen-matrix 10))
-        comp-two (m/add (gen-matrix 10) (gen-matrix 10))
-        comp-three (m/mul (gen-matrix 10) (gen-matrix 10))]))
 
 (defn- rand-int+ 
   [n]
