@@ -34,7 +34,7 @@
   `(do
      (fn []
        (~-         
-         ~@(repeatedly (+ 3 (rand-int+ 3)) #(gen-op (rand-int+ 0)))))))
+         ~@(repeatedly (+ 10 (rand-int+ 40)) #(gen-op (rand-int+ 10)))))))
 
 (defn- emitter 
   [] 
@@ -43,7 +43,7 @@
 (defmacro exper 
   []
   `(do 
-     (vector ~@(repeatedly 5 #(emitter)))))
+     (vector ~@(repeatedly 100 #(emitter)))))
  
 
 (defn -main []
