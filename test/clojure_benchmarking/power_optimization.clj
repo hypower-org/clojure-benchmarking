@@ -42,7 +42,7 @@
         (fn [& streams] 
           (s/map 
             (fn [agent-maps] 
-              (println "CLOUD: Here are the agent maps: \n" agent maps)
+              (println "CLOUD: Here are the agent maps: \n" agent-maps)
               (if (empty? (filter (fn [map] (< (:del-j map) 5)) agent-maps))
                 :kill ;;when they all get less than 5, terminate
                 :step) 
@@ -61,12 +61,12 @@
             (fn [[my-stream-map cloud-stream-msg]] 
               (if (= cloud-stream-msg :step)
                 (do
-                  (println "stepping... currently at: " (:del-j my-stream-msg))
-                  {:id (my-key) :del-j (dec (:del-j my-stream-msg))})
+                  (println "stepping... currently at: " (:del-j my-stream-map))
+                  {:id (my-key) :del-j (dec (:del-j my-stream-map))})
                 (do 
                   (println "did not receive step instruction... killing")
                   (s/close! my-stream))))                  
-            (apply s/zip streams)))))))
+            (apply s/zip [my-stream cloud-stream])))))))
 
      
      
