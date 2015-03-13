@@ -26,7 +26,7 @@
  (defn requires []
    (if (= (my-key) :agent-1)
      (into [] (map (fn [num] (keyword (str "agent-" num)))(range 2 (inc neighbors))))
-     [:cloud]))
+     (vector (my-key) :cloud)))
             
  (let [cloud-vertex (if (= (my-key) :agent-1) 
                       ;only make cloud vertex if you are agent 1
