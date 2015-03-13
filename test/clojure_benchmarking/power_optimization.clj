@@ -2,7 +2,8 @@
    (:require [watershed.core :as w]
             [manifold.stream :as s]
             [manifold.deferred :as d]
-            [physicloud.core :as phy]))
+            [physicloud.core :as phy])
+   (:gen-class))
 (defn -main []
  ;;pull initial state, ip, etc from config file...
  (def properties (load-file "opt-config.clj"))
@@ -30,6 +31,7 @@
             
  (let [cloud-vertex (if (= (my-key) :agent-1) 
                       ;only make cloud vertex if you are agent 1
+                      (println "making cloud vertex...")
                       (w/vertex 
                         :cloud 
                         (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
@@ -62,7 +64,7 @@
                                   (println "did not receive step instruction... killing"))))                  
                             (apply s/zip [my-stream cloud-stream])))))]
    (if cloud-vertex
-     ;build cloud vertex if agent1
+     ;build cloud vertex if agent-1
       (phy/physicloud-instance 
          {:ip ip
           :neighbors neighbors
