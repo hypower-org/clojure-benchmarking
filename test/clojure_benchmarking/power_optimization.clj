@@ -39,6 +39,7 @@
       (w/vertex 
         :cloud 
         (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
+        (fn [] :step)
         (fn [& streams] 
           (s/map 
             (fn [agent-maps] 
