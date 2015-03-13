@@ -27,70 +27,58 @@
    (if (= (my-key) :agent-1)
      (into [] (map (fn [num] (keyword (str "agent-" num)))(range 2 (inc neighbors))))
      [:cloud]))
-  
- (if (= (my-key) :agent-1) 
-   ;only make cloud vertex if you are agent 1
-   (phy/physicloud-instance 
-      {:ip ip
-       :neighbors neighbors
-       :provides (provides)
-       :requires (requires)}
-      (w/vertex 
-        :cloud 
-        (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
-        (fn cloud-fn 
-          ([] :step)
-          ([& streams] 
-          (s/map 
-            (fn [agent-maps] 
-              (println "CLOUD: Here are the agent maps: \n" agent-maps)
-              (if (empty? (filter (fn [map] (> (:del-j map) epsilon)) agent-maps))
-                   :kill ;;when they all get less than epsilon, terminate
-                   :step))
-            (apply s/zip streams)))))
-      ;agent vertex currently faking gradient descent
-      (w/vertex 
-        (my-key) 
-        [(my-key) :cloud] 
-        (fn 
-          ([] 
-            (println "no args received at" (my-key) "vertex function") {:id (my-key) :del-j 10000})
+            
+ (let [cloud-vertex (if (= (my-key) :agent-1) 
+                      ;only make cloud vertex if you are agent 1
+                      (w/vertex 
+                        :cloud 
+                        (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
+                        (fn cloud-fn 
+                          ([] :step)
+                          ([& streams] 
+                          (s/map 
+                            (fn [agent-maps] 
+                              (println "CLOUD: Here are the agent maps: \n" agent-maps)
+                              (if (empty? (filter (fn [map] (> (:del-j map) epsilon)) agent-maps))
+                                   :kill ;;when they all get less than epsilon, terminate
+                                   :step))
+                            (apply s/zip streams))))))
+       agent-vertex ;agent vertex currently faking gradient descent
+                    (w/vertex 
+                      (my-key) 
+                      [(my-key) :cloud] 
+                      (fn 
+                        ([] 
+                          (println "no args received at" (my-key) "vertex function") {:id (my-key) :del-j 10000})
          
-          ([my-stream cloud-stream] 
-            (s/map 
-              (fn [[my-stream-map cloud-stream-msg]] 
-                (if (= cloud-stream-msg :step)
-                  (do
-                    (println "stepping... currently at: " (:del-j my-stream-map))
-                    {:id (my-key) :del-j (dec (:del-j my-stream-map))})
-                  (do 
-                    (println "did not receive step instruction... killing"))))                  
-              (apply s/zip [my-stream cloud-stream]))))))
-   ;;else...
-   (phy/physicloud-instance 
-      {:ip ip
-       :neighbors neighbors
-       :provides (provides)
-       :requires (requires)}
-     ;agent vertex currently faking gradient descent
-      (w/vertex 
-        (my-key) 
-        [(my-key) :cloud] 
-        (fn 
-          ([] 
-            (println "no args received to" (my-key) "vertex function") {:id (my-key) :del-j 10000})
-         
-          ([my-stream cloud-stream] 
-            (s/map 
-              (fn [[my-stream-map cloud-stream-msg]] 
-                (if (= cloud-stream-msg :step)
-                  (do
-                    (println "stepping... currently at: " (:del-j my-stream-map))
-                    {:id (my-key) :del-j (dec (:del-j my-stream-map))})
-                  (do 
-                    (println "did not receive step instruction... killing")
-                    (s/close! my-stream))))                  
-              (apply s/zip [my-stream cloud-stream]))))))))
+                        ([my-stream cloud-stream] 
+                          (s/map 
+                            (fn [[my-stream-map cloud-stream-msg]] 
+                              (if (= cloud-stream-msg :step)
+                                (do
+                                  (println "stepping... currently at: " (:del-j my-stream-map))
+                                  {:id (my-key) :del-j (dec (:del-j my-stream-map))})
+                                (do 
+                                  (println "did not receive step instruction... killing"))))                  
+                            (apply s/zip [my-stream cloud-stream])))))]
+   (if cloud-vertex
+     ;build cloud vertex if agent1
+      (phy/physicloud-instance 
+         {:ip ip
+          :neighbors neighbors
+          :provides (provides)
+          :requires (requires)}
+         cloud-vertex
+         agent-vertex)
+      
+      (phy/physicloud-instance 
+        {:ip ip
+         :neighbors neighbors
+         :provides (provides)
+         :requires (requires)}
+        agent-vertex))))
+      
+           
      
      
      
