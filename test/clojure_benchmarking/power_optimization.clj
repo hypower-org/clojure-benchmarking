@@ -13,6 +13,8 @@
      (def ip (:ip properties))
      (def neighbors (:neighbors properties))))
  
+ (def epsilon 0.02)
+ 
  (defn my-key []
    (keyword (str "agent-" (:agent-num properties))))
   
@@ -42,8 +44,8 @@
           (s/map 
             (fn [agent-maps] 
               (println "CLOUD: Here are the agent maps: \n" agent-maps)
-              (if (empty? (filter (fn [map] (> (:del-j map) 5)) agent-maps))
-                   :kill ;;when they all get less than 5, terminate
+              (if (empty? (filter (fn [map] (> (:del-j map) epsilon)) agent-maps))
+                   :kill ;;when they all get less than epsilon, terminate
                    :step))
             (apply s/zip streams)))))
       ;agent vertex currently faking gradient descent
@@ -62,8 +64,7 @@
                     (println "stepping... currently at: " (:del-j my-stream-map))
                     {:id (my-key) :del-j (dec (:del-j my-stream-map))})
                   (do 
-                    (println "did not receive step instruction... killing")
-                    (s/close! my-stream))))                  
+                    (println "did not receive step instruction... killing"))))                  
               (apply s/zip [my-stream cloud-stream]))))))
    ;;else...
    (phy/physicloud-instance 
