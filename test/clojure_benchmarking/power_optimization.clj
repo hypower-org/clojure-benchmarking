@@ -45,8 +45,8 @@
               (println "CLOUD: Here are the agent maps: \n" agent-maps)
               (if (empty? (filter (fn [map] (< (:del-j map) 5)) agent-maps))
                 :kill ;;when they all get less than 5, terminate
-                :step) 
-            (apply s/zip streams))))))
+                :step))
+            (apply s/zip streams)))))
     
     ;agent vertex currently faking gradient descent
     (w/vertex 
