@@ -33,7 +33,6 @@
  (defn -main []
    (let [cloud-vertex (if (= (my-key) :agent-1) 
                         ;only make cloud vertex if you are agent 1
-                        (println "making cloud vertex...")
                         (w/vertex 
                           :cloud 
                           (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
