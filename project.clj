@@ -9,7 +9,7 @@
                  [incanter "1.5.5"]
                  [hypower-org/watershed "0.1.5"]
                  [hypower-org/physicloud "0.2.0"]]
-  :plugins [[lein-nodisassemble "0.1.3"]]
+  ;:plugins [[lein-nodisassemble "0.1.3"]]
   ;:main clojure-benchmarking.control-benchmark
   ;:aot [clojure-benchmarking.control-benchmark]
   )
