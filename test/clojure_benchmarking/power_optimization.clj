@@ -27,7 +27,7 @@
  (defn requires []
    (if (= (my-key) :agent-1)
      (into [] (map (fn [num] (keyword (str "agent-" num)))(range 2 (inc neighbors))))
-     (vector (my-key) :cloud)))
+     (vector :cloud)))
             
  
  (defn -main []
