@@ -66,14 +66,15 @@
 
 (defn cloud-fn
   [agents]     
-  (let [states (mapv (fn [agent] (my-x agent)) agents)]    
+  (let [states (mapv (fn [agent] (my-x agent)) agents)]   
+    (println "cloud iterating... states: " states)
     (swap! state-history conj states)
     (swap! iterations inc)
     [states (mu-step agents (:mu (first agents))) (step? agents)]))
 
 (defn produce-plot [num-agents]
   (let [plot (xy-plot
-               @iterations
+               (range 0 @iterations)
                (map (fn [state-vec] (get state-vec 0)) @state-history)
                :series-label  "Agent-0"
                :points true 
@@ -82,7 +83,7 @@
                :y-label "Power (W)")]
     (doseq [num (range 1 num-agents)]
       (add-lines plot 
-                @iterations 
+                (range 0 @iterations) 
                 (map 
                   (fn [state-vec] (get state-vec num)) 
                   @state-history) 

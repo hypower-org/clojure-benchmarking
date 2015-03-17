@@ -69,8 +69,13 @@
                               (fn [zipped-streams] 
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
-                                  (println "running...")
-                                  (q/agent-fn my-agent-map states mu)))
+                                  (if step? 
+                                    (do
+                                      (println "running...")
+                                      (q/agent-fn my-agent-map states mu))
+                                    (do
+                                      (println "step instruction not received, stopping...")
+                                      (s/close! my-stream)))))
                               (apply s/zip [my-stream cloud-stream])))))
                       
 ;         kill-vertex (w/vertex :kill 
