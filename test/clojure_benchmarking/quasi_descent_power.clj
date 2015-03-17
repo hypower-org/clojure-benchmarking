@@ -59,7 +59,7 @@
   (let [val (+ (del-objective-function agent) 
                (+ (nth (:mu agent) (inc (:id agent))) 
                   (first (:mu agent))))]
-    (prinln "E: " epsilon)
+    (println "E: " epsilon)
     (< val epsilon)))
 
 (defn step? [agents]
