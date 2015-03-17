@@ -17,7 +17,7 @@
  
                        
  (def init-agent-map {;mu vector length is num-agents + 1
-                      :mu (vec repeat (inc neighbors) 0) 
+                      :mu (vec (repeat (inc neighbors) 0))
                        ;x is the vector holding this agent's copy of everyone's state
                       :x (assoc (vec (repeat neighbors 0)) (:id properties) (:start-power properties))
                        ;x-spec is the specified power
@@ -69,7 +69,8 @@
                               (fn [zipped-streams] 
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
-                                    (q/agent-fn my-agent-map states mu)))
+                                  (println "running...")
+                                  (q/agent-fn my-agent-map states mu)))
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex :kill 
