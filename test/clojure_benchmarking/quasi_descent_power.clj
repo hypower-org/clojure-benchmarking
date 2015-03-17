@@ -69,7 +69,7 @@
   (let [states (mapv (fn [agent] (my-x agent)) agents)]    
     (swap! state-history conj states)
     (swap! iterations inc)
-    [states (mu-step agents (:mu (first agents))) (step?)]))
+    [states (mu-step agents (:mu (first agents))) (step? agents)]))
 
 (defn produce-plot [num-agents]
   (let [plot (xy-plot
