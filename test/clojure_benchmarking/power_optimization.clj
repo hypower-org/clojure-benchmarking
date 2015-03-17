@@ -73,20 +73,21 @@
                                   (q/agent-fn my-agent-map states mu)))
                               (apply s/zip [my-stream cloud-stream])))))
                       
-         kill-vertex (w/vertex :kill 
-                                [:cloud [:all :without [:kill]]] 
-                                (fn [cloud-stream & streams] 
-                                  (s/map 
-                                    (fn [[states mu step?]]
-                                      (when-not step?
-                                        (println "Did not receive step instruction from cloud, stopping...")
-                                        (println "final power states..." states)
-                                        (println "plotting algorithm progression...")
-                                        (q/produce-plot neighbors)
-                                        (doseq [s (concat [cloud-stream] streams)]
-                                          (if (s/stream? s)
-                                            (s/close! s)))))
-                                    cloud-stream)))]
+;         kill-vertex (w/vertex :kill 
+;                                [:cloud [:all :without [:kill]]] 
+;                                (fn [cloud-stream & streams] 
+;                                  (s/map 
+;                                    (fn [[states mu step?]]
+;                                      (when-not step?
+;                                        (println "Did not receive step instruction from cloud, stopping...")
+;                                        (println "final power states..." states)
+;                                        (println "plotting algorithm progression...")
+;                                        (q/produce-plot neighbors)
+;                                        (doseq [s (concat [cloud-stream] streams)]
+;                                          (if (s/stream? s)
+;                                            (s/close! s)))))
+;                                    cloud-stream)))
+         ]
      
      (def cloud-v cloud-vertex)
      (def agent-v agent-vertex)
@@ -101,7 +102,8 @@
             :requires (requires)}
            cloud-vertex
            agent-vertex
-           kill-vertex)
+           ;kill-vertex
+           )
        ;otherwise just build agent and kill vertices
         (phy/physicloud-instance
           {:ip ip
@@ -109,5 +111,6 @@
            :provides (provides)
            :requires (requires)}
            agent-vertex
-           kill-vertex))))
+          ; kill-vertex
+           ))))
       
