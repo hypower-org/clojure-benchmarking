@@ -52,7 +52,7 @@
                                                                               ;just causes certain elements of mu to persist (just index into mu instead)
 (defn agent-fn
   [agent state-vec mu]
-  (let [updated (assoc agent :mu mu :x ((:id agent) state-vec))]
+  (let [updated (assoc agent :mu mu :x (get state-vec (:id agent)))]
     (assoc-in updated [:x (:id updated)](state-step updated))))
 
 (defn within-epsilon? [agent]
