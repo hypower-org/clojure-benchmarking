@@ -69,17 +69,20 @@
                               (fn [zipped-streams] 
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
-                                  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
-                                  (if-not states 
-                                    (do 
-                                      (println "agent-vertex called with nil args from cloud vertex, emitting map...")
-                                      init-agent-map)
-                                    (do
-                                      (println "running...")
-                                      (q/agent-fn my-agent-map states mu))
-;                                    (do
-;                                      (println "step instruction not received, stopping...")
-;                                      (s/close! my-stream))
+                                  
+                                  (cond
+                                    (not states)  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
+                                      (do 
+                                        (println "agent-vertex called with nil args from cloud vertex, emitting map...")
+                                        init-agent-map)
+                                    step?
+                                      (do
+                                        (println "running...")
+                                        (q/agent-fn my-agent-map states mu))
+                                    :else
+                                      (do
+                                        (println "step instruction not received, stopping...")
+                                        (s/close! my-stream))
                                     )))
                               (apply s/zip [my-stream cloud-stream])))))
                       
