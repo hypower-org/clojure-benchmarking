@@ -48,10 +48,10 @@
                         ;only make cloud vertex if you are agent 0
                         (w/vertex 
                           :cloud 
-                          (into [] (map (fn [num] (keyword (str "agent-" num)))(range 0  neighbors))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
+                          (into [] (map (fn [num] (keyword (str "agent-" num)))(range 0  neighbors))) ;; should return something like: [:agent-0 :agent-1 :agent-2]
                           (fn cloud-fn
                             ([] (println "cloud vertex called without args")
-                                [(vec (repeat neighbors 0)) (vec (concat [1] (vec (repeat neighbors 0)))) true])
+                                [nil nil true])
                             ([& streams]
                             (s/map
                               (fn [agent-maps] 
@@ -69,13 +69,18 @@
                               (fn [zipped-streams] 
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
-                                  (if step? 
+                                  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
+                                  (if-not states 
+                                    (do 
+                                      (println "agent-vertex called with nil args from cloud vertex, emitting map...")
+                                      init-agent-map)
                                     (do
                                       (println "running...")
                                       (q/agent-fn my-agent-map states mu))
-                                    (do
-                                      (println "step instruction not received, stopping...")
-                                      (s/close! my-stream)))))
+;                                    (do
+;                                      (println "step instruction not received, stopping...")
+;                                      (s/close! my-stream))
+                                    )))
                               (apply s/zip [my-stream cloud-stream])))))
                       
 ;         kill-vertex (w/vertex :kill 
