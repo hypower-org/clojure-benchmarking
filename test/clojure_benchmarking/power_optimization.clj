@@ -8,6 +8,7 @@
 
  ;;pull initial state, ip, etc from config file...
  (def properties (load-file "opt-config.clj"))
+ (def count (atom 0))
  
  (if-not properties 
    (println "config file not found")
@@ -76,9 +77,14 @@
                                         (println "agent-vertex called with nil args from cloud vertex, emitting map...")
                                         init-agent-map)
                                     ;step?
+                                    (> @count 2000)
+                                      (do
+                                        (println "step instruction not received, stopping...")
+                                        (s/close! my-stream))
                                     :else
                                       (do
                                         (println "running...")
+                                        (swap! count inc)
                                         (q/agent-fn my-agent-map states mu))
 ;                                    :else
 ;                                      (do
