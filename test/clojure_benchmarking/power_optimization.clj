@@ -2,7 +2,8 @@
    (:require [watershed.core :as w]
             [manifold.stream :as s]
             [manifold.deferred :as d]
-            [physicloud.core :as phy])
+            [physicloud.core :as phy]
+            [clojure-benchmarking.quasi-descent-power :as q])
    (:gen-class))
 
  ;;pull initial state, ip, etc from config file...
@@ -14,86 +15,94 @@
      (def ip (:ip properties))
      (def neighbors (:neighbors properties))))
  
- (def epsilon 0.02)
- 
+                       
+ (def init-agent-map {;mu vector length is num-agents + 1
+                      :mu (vec repeat (inc neighbors) 0) 
+                       ;x is the vector holding this agent's copy of everyone's state
+                      :x (assoc (vec (repeat neighbors 0)) (:id properties) (:start-power properties))
+                       ;x-spec is the specified power
+                      :x-spec (:spec-power properties)
+                       ;ids range from 0 ... n where n is the number of agents (agent 0 gets cloud)
+                      :id (:id properties)
+                      ;max power that this cpu can draw
+                      :x-max (:max-power properties)
+                      ;weight of the objective function for this cpu 
+                      :alpha (:alpha properties)})
+                      
  (defn my-key []
-   (keyword (str "agent-" (:agent-num properties))))
+   (keyword (str "agent-" (:id properties))))
   
  (defn provides []
-   (if (= (my-key) :agent-1)
-     [:cloud :agent-1]
+   (if (= (my-key) :agent-0)
+     [:cloud :agent-0]
      (vector (my-key))))
  
  (defn requires []
-   (if (= (my-key) :agent-1)
-     (into [] (map (fn [num] (keyword (str "agent-" num)))(range 2 (inc neighbors))))
+   (if (= (my-key) :agent-0)
+     (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1  neighbors)))
      (vector :cloud)))
             
  
  (defn -main []
-   (let [cloud-vertex (if (= (my-key) :agent-1) 
-                        ;only make cloud vertex if you are agent 1
+   (let [cloud-vertex (if (= (my-key) :agent-0) 
+                        ;only make cloud vertex if you are agent 0
                         (w/vertex 
                           :cloud 
-                          (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1 (inc neighbors)))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
-                          (fn cloud-fn 
-                            ([] :step)
-                            ([& streams] 
-                            (s/map 
+                          (into [] (map (fn [num] (keyword (str "agent-" num)))(range 0  neighbors))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
+                          (fn cloud-fn
+                            ([] (println "cloud vertex called without args")
+                                [(vec (repeat neighbors 0)) (vec (concat [1] (vec (repeat neighbors 0))))])
+                            ([& streams]
+                            (s/map
                               (fn [agent-maps] 
-                                (println "CLOUD: Here are the agent maps: \n" agent-maps)
-                                (if (empty? (filter (fn [map] (> (:del-j map) epsilon)) agent-maps))
-                                     :kill ;;when they all get less than epsilon, terminate
-                                     :step))
+                                (q/cloud-fn agent-maps))
                               (apply s/zip streams))))))
-         agent-vertex ;agent vertex currently faking gradient descent
-                      (w/vertex 
-                        (my-key) 
-                        [(my-key) :cloud] 
-                        (fn 
-                          ([] 
-                            (println "no args received at" (my-key) "vertex function") {:id (my-key) :del-j 10000})
          
+         agent-vertex (w/vertex
+                        (my-key)
+                        [(my-key) :cloud]
+                        (fn
+                          ;if no args supplied, emit initial agent map
+                          ([] init-agent-map)
                           ([my-stream cloud-stream] 
                             (s/map 
-                              (fn [[my-stream-map cloud-stream-msg]] 
-                                (if (= cloud-stream-msg :step)
-                                  (do
-                                    (println "stepping... currently at: " (:del-j my-stream-map))
-                                    {:id (my-key) :del-j (dec (:del-j my-stream-map))})
-                                  (do 
-                                    (println "did not receive step instruction... killing"))))                  
-                              (apply s/zip [my-stream cloud-stream])))))]
+                              (fn [zipped-streams] 
+                                ;destructure streams 
+                                (let [[my-agent-map [states mu step?]] zipped-streams]
+                                    (q/agent-fn my-agent-map states mu)))
+                              (apply s/zip [my-stream cloud-stream])))))
+                      
+         kill-vertex (w/vertex :kill 
+                                [:cloud [:all :without [:kill]]] 
+                                (fn [cloud-stream & streams] 
+                                  (s/map 
+                                    (fn [[states mu step?]]
+                                      (when-not step?
+                                        (println "Did not receive step instruction from cloud, stopping...")
+                                        (println "final power states..." states)
+                                        (println "plotting algorithm progression...")
+                                        (q/produce-plot neighbors)
+                                        (doseq [s (concat [cloud-stream] streams)]
+                                          (if (s/stream? s)
+                                            (s/close! s)))))
+                                    cloud-stream)))]
+     
      (if cloud-vertex
-       ;build cloud vertex if agent-1
+       ;build cloud vertex if agent-0
         (phy/physicloud-instance 
            {:ip ip
             :neighbors neighbors
             :provides (provides)
             :requires (requires)}
            cloud-vertex
-           agent-vertex)
-      
-        (phy/physicloud-instance 
+           agent-vertex
+           kill-vertex)
+       ;otherwise just build agent and kill vertices
+        (phy/physicloud-instance
           {:ip ip
            :neighbors neighbors
            :provides (provides)
            :requires (requires)}
-           agent-vertex))))
+           agent-vertex
+           kill-vertex))))
       
-           
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-
