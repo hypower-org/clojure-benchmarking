@@ -4,8 +4,8 @@
 (use 'clojure.pprint)
 (use '(incanter core charts))
 
-(def rho 0.05)
-(def epsilon 0.0001)
+(def rho 0.001)
+(def epsilon 0.01)
 
 (def state-history (atom []))
 (def iterations (atom 0))
@@ -59,7 +59,7 @@
   (let [val (+ (del-objective-function agent) 
                (+ (nth (:mu agent) (inc (:id agent))) 
                   (first (:mu agent))))]
-    (println "E: " epsilon)
+    (println "E: " val)
     (< val epsilon)))
 
 (defn step? [agents]
