@@ -75,14 +75,15 @@
                                       (do 
                                         (println "agent-vertex called with nil args from cloud vertex, emitting map...")
                                         init-agent-map)
-                                    step?
+                                    ;step?
+                                    :else
                                       (do
                                         (println "running...")
                                         (q/agent-fn my-agent-map states mu))
-                                    :else
-                                      (do
-                                        (println "step instruction not received, stopping...")
-                                        (s/close! my-stream))
+;                                    :else
+;                                      (do
+;                                        (println "step instruction not received, stopping...")
+;                                        (s/close! my-stream))
                                     )))
                               (apply s/zip [my-stream cloud-stream])))))
                       
