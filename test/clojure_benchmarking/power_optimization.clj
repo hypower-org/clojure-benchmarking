@@ -91,7 +91,6 @@
      
      (def cloud-v cloud-vertex)
      (def agent-v agent-vertex)
-     (def kill-v kill-vertex)
      
      (if cloud-vertex
        ;build cloud vertex if agent-0
