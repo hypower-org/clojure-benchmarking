@@ -20,7 +20,7 @@
 
 (defn my-x 
   [agent]
-  ((:x agent) (:id agent)))
+  (get (:x agent) (:id agent)))
 
 (defn objective-function 
   [agent] 
