@@ -51,7 +51,7 @@
                           (into [] (map (fn [num] (keyword (str "agent-" num)))(range 0  neighbors))) ;; should return something like: [:agent-1 :agent-2 :agent-3]
                           (fn cloud-fn
                             ([] (println "cloud vertex called without args")
-                                [(vec (repeat neighbors 0)) (vec (concat [1] (vec (repeat neighbors 0))))])
+                                [(vec (repeat neighbors 0)) (vec (concat [1] (vec (repeat neighbors 0)))) true])
                             ([& streams]
                             (s/map
                               (fn [agent-maps] 

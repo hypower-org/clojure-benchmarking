@@ -51,7 +51,7 @@
                (+ (nth (:mu agent) (inc (:id agent))) (first (:mu agent)))))));due to sympilicity of global constraint, del-global-constraint
                                                                               ;just causes certain elements of mu to persist (just index into mu instead)
 (defn agent-fn
-  [agent [state-vec mu]]
+  [agent state-vec mu]
   (let [updated (assoc agent :mu mu :x ((:id agent) state-vec))]
     (assoc-in updated [:x (:id updated)](state-step updated))))
 
