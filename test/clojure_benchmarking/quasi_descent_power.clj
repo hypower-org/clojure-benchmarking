@@ -5,7 +5,7 @@
 (use '(incanter core charts))
 
 (def rho 0.001)
-(def epsilon .01)
+(def epsilon 0.01)
 
 (def state-history (atom []))
 (def iterations (atom 0))
