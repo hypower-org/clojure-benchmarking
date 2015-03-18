@@ -89,8 +89,8 @@
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
-                                [:cloud [:all :without [(keyword (str "kill-" (:id properties)))]]] 
-                                (fn [cloud-stream & streams] 
+                                [:cloud (my-key)] 
+                                (fn [cloud-stream my-stream] 
                                   (s/consume 
                                     (fn [[states mu step?]]
                                       (when-not step?
@@ -98,9 +98,7 @@
                                         (println "final power states..." states)
                                         (println "plotting algorithm progression...")
                                         (q/produce-plot neighbors)
-                                        (doseq [s (concat [cloud-stream] streams)]
-                                          (if (s/stream? s)
-                                            (s/close! s)))))
+                                        (s/close! cloud-stream)))
                                     (s/map identity cloud-stream))))
          ]
      
