@@ -15,7 +15,6 @@
    (do 
      (def ip (:ip properties))
      (def neighbors (:neighbors properties))))
- 
                        
  (def init-agent-map {;mu vector length is num-agents + 1
                       :mu  (vec (repeat  (inc neighbors) 0))
@@ -43,7 +42,6 @@
      (into [] (map (fn [num] (keyword (str "agent-" num)))(range 1  neighbors)))
      (vector :cloud)))
             
- 
  (defn -main []
    (let [cloud-vertex (if (= (my-key) :agent-0) 
                         ;only make cloud vertex if you are agent 0
@@ -70,22 +68,9 @@
                               (fn [zipped-streams] 
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
-                                  
-                                  (if
-                                    (not states)  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
-                                      (do 
-                                        (println "agent-vertex called with nil args from cloud vertex, emitting map...")
-                                        init-agent-map)
-                                      (do
-                                        (println "running...")
-                                        ;(swap! counter inc)
-                                        (q/agent-fn my-agent-map states mu))
-;                                    :else
-;                                    ;(> @counter 2000)
-;                                      (do
-;                                        (println "step instruction not received, stopping...")
-;                                        (s/close! my-stream))
-                                      )))
+                                  (if-not states  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
+                                    init-agent-map
+                                    (q/agent-fn my-agent-map states mu))))
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
@@ -99,8 +84,7 @@
                                         (println "plotting algorithm progression...")
                                         (q/produce-plot neighbors)
                                         (s/close! cloud-stream)))
-                                    (s/map identity cloud-stream))))
-         ]
+                                    (s/map identity cloud-stream))))]
      
      (if cloud-vertex
        ;build cloud vertex if agent-0
@@ -111,8 +95,7 @@
             :requires (requires)}
            cloud-vertex
            agent-vertex
-           kill-vertex
-           )
+           kill-vertex)
        ;otherwise just build agent and kill vertices
         (phy/physicloud-instance
           {:ip ip
@@ -120,6 +103,5 @@
            :provides (provides)
            :requires (requires)}
            agent-vertex
-           kill-vertex
-           ))))
+           kill-vertex))))
       

@@ -4,7 +4,7 @@
 (use 'clojure.pprint)
 (use '(incanter core charts))
 
-(def rho 0.001)
+(def rho 0.01)
 (def epsilon 0.01)
 
 (def state-history (atom []))
