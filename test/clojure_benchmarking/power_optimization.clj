@@ -22,7 +22,7 @@
                       :x (assoc (vec (repeat neighbors 0)) (:id properties) (:spec-power properties))
                        ;x-spec is the specified power
                       :x-spec (:spec-power properties)
-                       ;ids range from 0 ... n where n is the number of agents (agent 0 gets cloud)
+                       ;ids range from 0 ... n-1 where n is the number of agents (agent 0 gets cloud)
                       :id (:id properties)
                       ;max power that this cpu can draw
                       :x-max (:max-power properties)
@@ -69,8 +69,12 @@
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
                                   (if-not states  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
-                                    init-agent-map
-                                    (q/agent-fn my-agent-map states mu))))
+                                    (do
+                                      (println "agent vertex running, emitting init-map")
+                                      init-agent-map)
+                                    (do
+                                      (println "agent vertex running, received this info: " [my-agent-map [states mu step?]])
+                                      (q/agent-fn my-agent-map states mu)))))
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
