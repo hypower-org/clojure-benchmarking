@@ -18,7 +18,7 @@
  
                        
  (def init-agent-map {;mu vector length is num-agents + 1
-                      :mu (vec (repeat (inc neighbors) 0))
+                      :mu  (vec (repeat  (inc neighbors) 0))
                        ;x is the vector holding this agent's copy of everyone's state
                       :x (assoc (vec (repeat neighbors 0)) (:id properties) (:spec-power properties))
                        ;x-spec is the specified power

@@ -44,11 +44,15 @@
   [agents mu]
   (ebe-add mu (dot-mult (global-constraint agents) rho)))
 
+(defn del-lagrangian 
+  [agent]
+  (+ (del-objective-function agent) 
+     (+ (nth (:mu agent) (inc (:id agent))) (first (:mu agent)))))
+
 (defn state-step
   [agent]
   (- (my-x agent)
-     (* rho (+ (del-objective-function agent) 
-               (+ (nth (:mu agent) (inc (:id agent))) (first (:mu agent)))))));due to sympilicity of global constraint, del-global-constraint
+     (* rho (del-lagrangian agent))));due to sympilicity of global constraint, del-global-constraint
                                                                               ;just causes certain elements of mu to persist (just index into mu instead)
 (defn agent-fn
   [agent state-vec mu]
@@ -67,11 +71,14 @@
 
 (defn cloud-fn
   [agents]     
-  (let [states (mapv (fn [agent] (my-x agent)) agents)]   
+  (let [states (mapv (fn [agent] (my-x agent)) agents)
+        updated-agents (mapv (fn [agent] (assoc agent :x states)) agents)
+        mu-vec (mu-step updated-agents (:mu (first agents)))
+        updated-agents (mapv (fn [agent] (assoc agent :mu mu-vec)) agents)]   
     (println "cloud iterating... states: " states)
     (swap! state-history conj states)
     (swap! iterations inc)
-    [states (mu-step agents (:mu (first agents))) (step? agents)]))
+    [states mu-vec (step? agents)]))
 
 (defn produce-plot [num-agents]
   (let [plot (xy-plot
