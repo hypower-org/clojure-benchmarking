@@ -69,12 +69,8 @@
                                 ;destructure streams 
                                 (let [[my-agent-map [states mu step?]] zipped-streams]
                                   (if-not states  ;;if cloud vertex gets called first, it sends nils in for args so agents can emit their initial maps
-                                    (do
-                                      (println "agent vertex running, emitting init-map")
-                                      init-agent-map)
-                                    (do
-                                      (println "agent vertex running, received this info: " [my-agent-map [states mu step?]])
-                                      (q/agent-fn my-agent-map states mu)))))
+                                      init-agent-map
+                                      (q/agent-fn my-agent-map states mu))))
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
