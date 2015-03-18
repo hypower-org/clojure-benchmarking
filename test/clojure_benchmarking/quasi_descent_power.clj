@@ -5,7 +5,7 @@
 (use '(incanter core charts))
 
 (def rho 0.001)
-(def epsilon 0.01)
+(def epsilon .01)
 
 (def state-history (atom []))
 (def iterations (atom 0))
@@ -56,9 +56,9 @@
     (assoc-in updated [:x (:id updated)](state-step updated))))
 
 (defn within-epsilon? [agent]
-  (let [val (+ (del-objective-function agent) 
-               (+ (nth (:mu agent) (inc (:id agent))) 
-                  (first (:mu agent))))]
+  (let [val (Math/abs (+ (del-objective-function agent) 
+                         (+ (nth (:mu agent) (inc (:id agent))) 
+                            (first (:mu agent)))))]
     (println "E: " val)
     (< val epsilon)))
 

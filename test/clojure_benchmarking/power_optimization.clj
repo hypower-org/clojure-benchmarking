@@ -76,41 +76,33 @@
                                       (do 
                                         (println "agent-vertex called with nil args from cloud vertex, emitting map...")
                                         init-agent-map)
-                                    ;step?
-                                    (> @counter 2000)
-                                      (do
-                                        (println "step instruction not received, stopping...")
-                                        (s/close! my-stream))
-                                    :else
+                                    step?
                                       (do
                                         (println "running...")
-                                        (swap! counter inc)
+                                        ;(swap! counter inc)
                                         (q/agent-fn my-agent-map states mu))
-;                                    :else
-;                                      (do
-;                                        (println "step instruction not received, stopping...")
-;                                        (s/close! my-stream))
-                                    )))
+                                    :else
+                                    ;(> @counter 2000)
+                                      (do
+                                        (println "step instruction not received, stopping...")
+                                        (s/close! my-stream)))))
                               (apply s/zip [my-stream cloud-stream])))))
                       
-;         kill-vertex (w/vertex :kill 
-;                                [:cloud [:all :without [:kill]]] 
-;                                (fn [cloud-stream & streams] 
-;                                  (s/map 
-;                                    (fn [[states mu step?]]
-;                                      (when-not step?
-;                                        (println "Did not receive step instruction from cloud, stopping...")
-;                                        (println "final power states..." states)
-;                                        (println "plotting algorithm progression...")
-;                                        (q/produce-plot neighbors)
-;                                        (doseq [s (concat [cloud-stream] streams)]
-;                                          (if (s/stream? s)
-;                                            (s/close! s)))))
-;                                    cloud-stream)))
+         kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
+                                [:cloud [:all :without [(keyword (str "kill-" (:id properties)))]]] 
+                                (fn [cloud-stream & streams] 
+                                  (s/consume 
+                                    (fn [[states mu step?]]
+                                      (when-not step?
+                                        (println "Did not receive step instruction from cloud, stopping...")
+                                        (println "final power states..." states)
+                                        (println "plotting algorithm progression...")
+                                        (q/produce-plot neighbors)
+                                        (doseq [s (concat [cloud-stream] streams)]
+                                          (if (s/stream? s)
+                                            (s/close! s)))))
+                                    (s/map identity cloud-stream))))
          ]
-     
-     (def cloud-v cloud-vertex)
-     (def agent-v agent-vertex)
      
      (if cloud-vertex
        ;build cloud vertex if agent-0
@@ -121,7 +113,7 @@
             :requires (requires)}
            cloud-vertex
            agent-vertex
-           ;kill-vertex
+           kill-vertex
            )
        ;otherwise just build agent and kill vertices
         (phy/physicloud-instance
@@ -130,6 +122,6 @@
            :provides (provides)
            :requires (requires)}
            agent-vertex
-          ; kill-vertex
+           kill-vertex
            ))))
       
