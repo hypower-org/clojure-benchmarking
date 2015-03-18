@@ -20,7 +20,7 @@
  (def init-agent-map {;mu vector length is num-agents + 1
                       :mu (vec (repeat (inc neighbors) 0))
                        ;x is the vector holding this agent's copy of everyone's state
-                      :x (assoc (vec (repeat neighbors 0)) (:id properties) (:start-power properties))
+                      :x (assoc (vec (repeat neighbors 0)) (:id properties) (:spec-power properties))
                        ;x-spec is the specified power
                       :x-spec (:spec-power properties)
                        ;ids range from 0 ... n where n is the number of agents (agent 0 gets cloud)
