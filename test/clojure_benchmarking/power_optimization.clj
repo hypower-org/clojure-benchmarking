@@ -89,8 +89,8 @@
                               (apply s/zip [my-stream cloud-stream])))))
                       
          kill-vertex (w/vertex (keyword (str "kill-" (:id properties))) 
-                                [:cloud (my-key)] 
-                                (fn [cloud-stream my-stream] 
+                                [:cloud] 
+                                (fn [cloud-stream] 
                                   (s/consume 
                                     (fn [[states mu step?]]
                                       (when-not step?
