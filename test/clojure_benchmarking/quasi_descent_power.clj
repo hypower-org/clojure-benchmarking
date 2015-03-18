@@ -74,11 +74,11 @@
   (let [states (mapv (fn [agent] (my-x agent)) agents)
         updated-agents (mapv (fn [agent] (assoc agent :x states)) agents)
         mu-vec (mu-step updated-agents (:mu (first agents)))
-        updated-agents (mapv (fn [agent] (assoc agent :mu mu-vec)) agents)]   
+        updated-agents (mapv (fn [agent] (assoc agent :mu mu-vec)) updated-agents)]   
     (println "cloud iterating... states: " states)
     (swap! state-history conj states)
     (swap! iterations inc)
-    [states mu-vec (step? agents)]))
+    [states mu-vec (step? updated-agents)]))
 
 (defn produce-plot [num-agents]
   (let [plot (xy-plot
